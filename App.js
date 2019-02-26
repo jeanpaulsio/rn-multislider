@@ -1,7 +1,9 @@
 import React from "react";
 import { PanResponder, StyleSheet, View } from "react-native";
 
-import { createArray, valueToPosition, positionToValue } from "./converters";
+import { throttle } from "lodash";
+
+import { createArray, valueToPosition } from "./converters";
 
 function DefaultMarker() {
   return (
@@ -32,10 +34,9 @@ function customPanResponder(move, end) {
 }
 
 const SLIDER_LENGTH = 280;
-const MIN = 0;
+const MIN = 1;
 const MAX = 10;
 const STEP = 1;
-const SLIP_DISPLACEMENT = 200;
 
 export default class MultiSlider extends React.Component {
   static defaultProps = {
@@ -53,12 +54,10 @@ export default class MultiSlider extends React.Component {
     );
 
     this.state = {
-      valueOne: this.props.values[0],
-      valueTwo: this.props.values[1],
-      pastOne: initialValues[0],
-      pastTwo: initialValues[1],
-      positionOne: initialValues[0],
-      positionTwo: initialValues[1]
+      prevX1: initialValues[0],
+      prevX2: initialValues[1],
+      x1: initialValues[0],
+      x2: initialValues[1]
     };
 
     this._panResponderOne = customPanResponder(this.moveOne, this.endOne);
@@ -66,64 +65,56 @@ export default class MultiSlider extends React.Component {
   }
 
   moveOne = gestureState => {
-    const accumDistance = gestureState.dx;
-    const accumDistanceDisplacement = gestureState.dy;
+    const dx = gestureState.dx;
+    const changeInX = dx + this.state.prevX1;
 
-    const unconfined = accumDistance + this.state.pastOne;
-    var bottom = 0;
-    var trueTop = this.state.positionTwo - this.stepLength;
-    var top = trueTop === 0 ? 0 : trueTop || SLIDER_LENGTH;
-    var confined =
-      unconfined < bottom ? bottom : unconfined > top ? top : unconfined;
-    var slipDisplacement = SLIP_DISPLACEMENT;
+    const minPossibleX = 0;
+    const maxPossibleX = this.state.x2 - this.stepLength;
 
-    if (
-      Math.abs(accumDistanceDisplacement) < slipDisplacement ||
-      !slipDisplacement
-    ) {
-      var value = positionToValue(confined, this.optionsArray, SLIDER_LENGTH);
-      this.setState({ positionOne: confined, valueOne: value });
-    }
+    const x1 =
+      changeInX < minPossibleX
+        ? minPossibleX
+        : changeInX > maxPossibleX
+        ? maxPossibleX
+        : changeInX;
+
+    this.setState({ x1 });
   };
 
   moveTwo = gestureState => {
-    const accumDistance = gestureState.dx;
-    const accumDistanceDisplacement = gestureState.dy;
+    const dx = gestureState.dx;
+    const changeInX = dx + this.state.prevX2;
 
-    const unconfined = accumDistance + this.state.pastTwo;
-    var bottom = this.state.positionOne + this.stepLength;
-    var top = SLIDER_LENGTH;
-    var confined =
-      unconfined < bottom ? bottom : unconfined > top ? top : unconfined;
-    var slipDisplacement = SLIP_DISPLACEMENT;
+    const minPossibleX = this.state.x1 + this.stepLength;
+    const maxPossibleX = SLIDER_LENGTH;
 
-    if (
-      Math.abs(accumDistanceDisplacement) < slipDisplacement ||
-      !slipDisplacement
-    ) {
-      var value = positionToValue(confined, this.optionsArray, SLIDER_LENGTH);
-      this.setState({ positionTwo: confined, valueTwo: value });
-    }
+    var x2 =
+      changeInX < minPossibleX
+        ? minPossibleX
+        : changeInX > maxPossibleX
+        ? maxPossibleX
+        : changeInX;
+
+    this.setState({ x2 });
   };
 
   endOne = () => {
-    this.setState({ pastOne: this.state.positionOne }, this.logstate);
+    this.setState({ prevX1: this.state.x1 }, this.logstate);
   };
 
   endTwo = () => {
-    this.setState({ pastTwo: this.state.positionTwo }, this.logstate);
+    this.setState({ prevX2: this.state.x2 }, this.logstate);
   };
 
   logstate = () => {
-    //
-    // console.log(this.state)
+    // console.log(this.state);
   };
 
   render() {
-    const { positionOne, positionTwo } = this.state;
+    const { x1, x2 } = this.state;
 
-    const trackOneLength = positionOne;
-    const trackThreeLength = SLIDER_LENGTH - positionTwo;
+    const trackOneLength = x1;
+    const trackThreeLength = SLIDER_LENGTH - x2;
     const trackTwoLength = SLIDER_LENGTH - trackOneLength - trackThreeLength;
 
     const markerContainerOne = {
@@ -148,7 +139,12 @@ export default class MultiSlider extends React.Component {
                 { width: trackTwoLength }
               ]}
             />
-            <View style={[styles.track, { width: trackThreeLength }]} />
+            <View
+              style={[
+                styles.track,
+                { width: trackThreeLength, backgroundColor: "green" }
+              ]}
+            />
             <View style={[styles.markerContainer, markerContainerOne]}>
               <View style={styles.touch} {...this._panResponderOne.panHandlers}>
                 <DefaultMarker />
