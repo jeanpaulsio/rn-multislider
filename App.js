@@ -25,18 +25,22 @@ function customPanResponder(move, end) {
     onMoveShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponderCapture: () => true,
     onPanResponderGrant: () => true,
-    onPanResponderMove: (_, gestureState) => move(gestureState),
+    onPanResponderMove: (_, gs) => move(gs),
     onPanResponderTerminationRequest: () => false,
-    onPanResponderRelease: (_, gestureState) => end(gestureState),
-    onPanResponderTerminate: (_, gestureState) => end(gestureState),
+    onPanResponderRelease: (_, gs) => end(gs),
+    onPanResponderTerminate: (_, gs) => end(gs),
     onShouldBlockNativeResponder: () => true
   });
 }
 
-const SLIDER_LENGTH = 280;
+const SLIDER_LENGTH = 290;
 const MIN = 540;
 const MAX = 1200;
 const STEP = 30;
+const BOUNDARY = 20;
+
+// TODO need to be able to calculate BOUNDARY based on diameter of marker as well
+// as some defined padding
 
 export default class MultiSlider extends React.Component {
   static defaultProps = {
@@ -78,9 +82,7 @@ export default class MultiSlider extends React.Component {
         ? maxPossibleX
         : changeInX;
 
-    const BOUNDARY = 20;
     if (maxPossibleX - x1 <= BOUNDARY) {
-      console.log("x1 needs adjustment", maxPossibleX, x1);
       x1 = maxPossibleX - BOUNDARY;
     }
 
@@ -101,7 +103,6 @@ export default class MultiSlider extends React.Component {
         ? maxPossibleX
         : changeInX;
 
-    const BOUNDARY = 20;
     if (minPossibleX + BOUNDARY >= x2) {
       x2 = minPossibleX + BOUNDARY;
     }
@@ -195,7 +196,8 @@ const styles = StyleSheet.create({
   container: {
     position: "relative",
     height: 50,
-    justifyContent: "center"
+    justifyContent: "center",
+    borderWidth: 1
   },
   fullTrack: {
     flexDirection: "row"
