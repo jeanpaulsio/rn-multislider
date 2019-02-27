@@ -11,9 +11,9 @@ function DefaultMarker() {
   return (
     <View
       style={{
-        width: 20,
-        height: 20,
-        borderRadius: 10,
+        width: MARKER_SIZE,
+        height: MARKER_SIZE,
+        borderRadius: MARKER_SIZE / 2,
         backgroundColor: "grey"
       }}
     />
@@ -200,6 +200,7 @@ export default class MultiSlider extends React.Component {
 }
 
 const MARKER_CONTAINER_SIZE = 48;
+const MARKER_SIZE = MARKER_CONTAINER_SIZE / 3;
 
 const styles = StyleSheet.create({
   Root: {
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
   },
   container: {
     position: "relative",
-    height: 50,
+    height: MARKER_CONTAINER_SIZE,
     justifyContent: "center",
     borderWidth: 1
   },
