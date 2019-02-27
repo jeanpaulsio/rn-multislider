@@ -49,8 +49,8 @@ const MAX = 1200;
 const STEP = 30;
 const BOUNDARY = 20;
 
-// TODO need to be able to calculate BOUNDARY based on diameter of marker as well
-// as some defined padding
+// TODO: need to be able to calculate BOUNDARY based on diameter of marker as well as some defined padding
+// TODO: need to make SLIDER_LENGTH not a fixed width
 
 export default class MultiSlider extends React.Component {
   static defaultProps = {
@@ -178,21 +178,18 @@ export default class MultiSlider extends React.Component {
                 { width: trackTwoLength }
               ]}
             />
+            <View style={[styles.track, { width: trackThreeLength }]} />
             <View
-              style={[
-                styles.track,
-                { width: trackThreeLength, backgroundColor: "green" }
-              ]}
-            />
-            <View style={[styles.markerContainer, markerContainerOne]}>
-              <View style={styles.touch} {...this.panResponderX1.panHandlers}>
-                <DefaultMarker />
-              </View>
+              style={[styles.markerContainer, markerContainerOne]}
+              {...this.panResponderX1.panHandlers}
+            >
+              <DefaultMarker />
             </View>
-            <View style={[styles.markerContainer, markerContainerTwo]}>
-              <View style={styles.touch} {...this.panResponderX2.panHandlers}>
-                <DefaultMarker />
-              </View>
+            <View
+              style={[styles.markerContainer, markerContainerTwo]}
+              {...this.panResponderX2.panHandlers}
+            >
+              <DefaultMarker />
             </View>
           </View>
         </View>
@@ -232,13 +229,7 @@ const styles = StyleSheet.create({
     height: MARKER_CONTAINER_SIZE,
     backgroundColor: "transparent",
     justifyContent: "center",
-    alignItems: "center"
-  },
-  touch: {
-    backgroundColor: "transparent",
-    justifyContent: "center",
     alignItems: "center",
-    alignSelf: "stretch",
-    flex: 1
+    borderWidth: 1
   }
 });
