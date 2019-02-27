@@ -20,7 +20,7 @@ function DefaultMarker() {
   );
 }
 
-function customPanResponder(move, end) {
+function createPanResponder(move, end) {
   return PanResponder.create({
     onStartShouldSetPanResponder: () => true,
     onStartShouldSetPanResponderCapture: () => true,
@@ -35,6 +35,7 @@ function customPanResponder(move, end) {
   });
 }
 
+// TODO: write test for this
 function calculateNewXPosition(changeInX, minPossibleX, maxPossibleX) {
   return changeInX < minPossibleX
     ? minPossibleX
@@ -78,8 +79,8 @@ export default class MultiSlider extends React.Component {
       prevX2: x2
     };
 
-    this.panResponderX1 = customPanResponder(this.moveX1, this.endX1);
-    this.panResponderX2 = customPanResponder(this.moveX2, this.endX2);
+    this.panResponderX1 = createPanResponder(this.moveX1, this.endX1);
+    this.panResponderX2 = createPanResponder(this.moveX2, this.endX2);
   }
 
   moveX1 = gestureState => {
