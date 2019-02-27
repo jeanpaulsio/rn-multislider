@@ -45,12 +45,13 @@ function calculateNewXPosition(changeInX, minPossibleX, maxPossibleX) {
 }
 
 const SLIDER_LENGTH = 290;
-const MIN = 540;
-const MAX = 1200;
-const STEP = 30;
-const BOUNDARY = 20;
+// const MIN = 540;
+// const MAX = 1200;
+// const STEP = 30;
 
-// TODO: need to be able to calculate BOUNDARY based on diameter of marker as well as some defined padding
+const MIN = 1;
+const MAX = 10;
+const STEP = 1;
 // TODO: need to make SLIDER_LENGTH not a fixed width
 
 export default class MultiSlider extends React.Component {
@@ -92,8 +93,10 @@ export default class MultiSlider extends React.Component {
 
     let x1 = calculateNewXPosition(changeInX, minPossibleX, maxPossibleX);
 
-    if (maxPossibleX - x1 <= BOUNDARY) {
-      x1 = maxPossibleX - BOUNDARY;
+    const boundary = 0;
+
+    if (maxPossibleX - x1 <= boundary) {
+      x1 = maxPossibleX - boundary;
     }
 
     if (this.state.prevX1 !== x1) {
@@ -110,8 +113,10 @@ export default class MultiSlider extends React.Component {
 
     let x2 = calculateNewXPosition(changeInX, minPossibleX, maxPossibleX);
 
-    if (minPossibleX + BOUNDARY >= x2) {
-      x2 = minPossibleX + BOUNDARY;
+    const boundary = 0;
+
+    if (minPossibleX + boundary >= x2) {
+      x2 = minPossibleX + boundary;
     }
 
     if (this.state.prevX2 !== x2) {
@@ -201,6 +206,7 @@ export default class MultiSlider extends React.Component {
 
 const MARKER_CONTAINER_SIZE = 48;
 const MARKER_SIZE = MARKER_CONTAINER_SIZE / 3;
+const BOUNDARY = MARKER_SIZE;
 
 const styles = StyleSheet.create({
   Root: {
