@@ -3,7 +3,11 @@ import { PanResponder, StyleSheet, Text, View } from "react-native";
 
 import { debounce } from "lodash";
 
-import { createArray, valueToPosition, positionToValue } from "./converters";
+import {
+  createArrayValues,
+  valueToPosition,
+  positionToValue
+} from "./converters";
 
 function DefaultMarker() {
   return (
@@ -33,10 +37,18 @@ function customPanResponder(move, end) {
   });
 }
 
+function calculateNewXPosition(changeInX, minPossibleX, maxPossibleX) {
+  return changeInX < minPossibleX
+    ? minPossibleX
+    : changeInX > maxPossibleX
+    ? maxPossibleX
+    : changeInX;
+}
+
 const SLIDER_LENGTH = 290;
-const MIN = 540;
-const MAX = 1200;
-const STEP = 30;
+const MIN = 0;
+const MAX = 10;
+const STEP = 1;
 const BOUNDARY = 20;
 
 // TODO need to be able to calculate BOUNDARY based on diameter of marker as well
@@ -44,24 +56,24 @@ const BOUNDARY = 20;
 
 export default class MultiSlider extends React.Component {
   static defaultProps = {
-    values: [MIN, MAX]
+    values: [MIN, MAX - 2]
   };
 
   constructor(props) {
     super(props);
 
-    this.optionsArray = createArray(MIN, MAX, STEP);
+    this.optionsArray = createArrayValues(MIN, MAX, STEP);
     this.stepLength = SLIDER_LENGTH / this.optionsArray.length;
 
-    var initialValues = this.props.values.map(value =>
-      valueToPosition(value, this.optionsArray, SLIDER_LENGTH)
+    const [x1, x2] = this.props.values.map(value =>
+      valueToPosition(value, SLIDER_LENGTH, this.optionsArray)
     );
 
     this.state = {
-      prevX1: initialValues[0],
-      prevX2: initialValues[1],
-      x1: initialValues[0],
-      x2: initialValues[1]
+      x1,
+      x2,
+      prevX1: x1,
+      prevX2: x2
     };
 
     this._panResponderOne = customPanResponder(this.moveX1, this.endX1);
@@ -75,18 +87,15 @@ export default class MultiSlider extends React.Component {
     const minPossibleX = 0;
     const maxPossibleX = this.state.x2 - this.stepLength;
 
-    let x1 =
-      changeInX < minPossibleX
-        ? minPossibleX
-        : changeInX > maxPossibleX
-        ? maxPossibleX
-        : changeInX;
+    let x1 = calculateNewXPosition(changeInX, minPossibleX, maxPossibleX);
 
     if (maxPossibleX - x1 <= BOUNDARY) {
       x1 = maxPossibleX - BOUNDARY;
     }
 
-    this.setState({ x1 });
+    if (this.state.prevX1 !== x1) {
+      this.setState({ x1 });
+    }
   };
 
   moveX2 = gestureState => {
@@ -96,18 +105,15 @@ export default class MultiSlider extends React.Component {
     const minPossibleX = this.state.x1 + this.stepLength;
     const maxPossibleX = SLIDER_LENGTH;
 
-    let x2 =
-      changeInX < minPossibleX
-        ? minPossibleX
-        : changeInX > maxPossibleX
-        ? maxPossibleX
-        : changeInX;
+    let x2 = calculateNewXPosition(changeInX, minPossibleX, maxPossibleX);
 
     if (minPossibleX + BOUNDARY >= x2) {
       x2 = minPossibleX + BOUNDARY;
     }
 
-    this.setState({ x2 });
+    if (this.state.prevX2 !== x2) {
+      this.setState({ x2 });
+    }
   };
 
   endX1 = () => {
@@ -149,8 +155,8 @@ export default class MultiSlider extends React.Component {
             justifyContent: "space-between"
           }}
         >
-          <Text>{positionToValue(x1, this.optionsArray, SLIDER_LENGTH)}</Text>
-          <Text>{positionToValue(x2, this.optionsArray, SLIDER_LENGTH)}</Text>
+          <Text>{positionToValue(x1, SLIDER_LENGTH, this.optionsArray)}</Text>
+          <Text>{positionToValue(x2, SLIDER_LENGTH, this.optionsArray)}</Text>
         </View>
         <View style={styles.container}>
           <View style={[styles.fullTrack, { width: SLIDER_LENGTH }]}>

@@ -1,82 +1,55 @@
-// Find closest index for a given value
-const closest = (array, n) => {
-  let minI = 0;
-  let maxI = array.length - 1;
-
-  if (array[minI] > n) {
-    return minI;
-  } else if (array[maxI] < n) {
-    return maxI;
-  } else if (array[minI] <= n && n <= array[maxI]) {
-    let closestIndex = null;
-
-    while (closestIndex === null) {
-      const midI = Math.round((minI + maxI) / 2);
-      const midVal = array[midI];
-
-      if (midVal === n) {
-        closestIndex = midI;
-      } else if (maxI === minI + 1) {
-        const minValue = array[minI];
-        const maxValue = array[maxI];
-        const deltaMin = Math.abs(minValue - n);
-        const deltaMax = Math.abs(maxValue - n);
-
-        closestIndex = deltaMax <= deltaMin ? maxI : minI;
-      } else if (midVal < n) {
-        minI = midI;
-      } else if (midVal > n) {
-        maxI = midI;
-      } else {
-        closestIndex = -1;
-      }
-    }
-
-    return closestIndex;
-  }
-
-  return -1;
-};
-
-export function valueToPosition(value, valuesArray, sliderLength) {
-  const index = closest(valuesArray, value);
-
-  const arrLength = valuesArray.length - 1;
+/**
+ * Calculates the x coordinate based on a given value
+ *
+ * @param {number} value
+ * @param {number} axisLength
+ * @param {array} values
+ * @return {number}
+ */
+export function valueToPosition(value, axisLength, values) {
+  const index = values.findIndex(i => i === value);
+  const arrLength = values.length - 1;
   const validIndex = index === -1 ? arrLength : index;
 
-  return (sliderLength * validIndex) / arrLength;
-}
-
-export function positionToValue(position, valuesArray, sliderLength) {
-  var arrLength;
-  var index;
-
-  if (position < 0 || sliderLength < position) {
-    return null;
-  } else {
-    arrLength = valuesArray.length - 1;
-    index = (arrLength * position) / sliderLength;
-    return valuesArray[Math.round(index)];
-  }
+  return (axisLength * validIndex) / arrLength;
 }
 
 /**
- *  createArray(0, 10, 1)
+ * Calculates the nearest value in the array based on a
+ * given x coordinate
  *
- *  returns [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+ * @param {number} coordinate
+ * @param {number} axisLength
+ * @param {array} values
+ * @return {number}
  */
-export function createArray(start, end, step) {
-  var i;
-  var length;
-  var direction = start - end > 0 ? -1 : 1;
-  var result = [];
-  if (!step) {
-    return result;
-  } else {
-    length = Math.abs((start - end) / step) + 1;
-    for (i = 0; i < length; i++) {
-      result.push(start + i * Math.abs(step) * direction);
-    }
-    return result;
+export function positionToValue(coordinate, axisLength, values) {
+  if (coordinate < 0 || axisLength < coordinate) {
+    return null;
   }
+
+  const arrLength = values.length - 1;
+  const index = (arrLength * coordinate) / axisLength;
+  return values[Math.round(index)];
+}
+
+/**
+ * Create an array based on min, max, and step values
+ * For example, createArray(0, 3, 1) returns
+ *    [0, 1, 2, 3]
+ *
+ * @param {number} min
+ * @param {number} max
+ * @return {array}
+ */
+export function createArrayValues(min, max, step = 1) {
+  const result = [];
+  const direction = min - max > 0 ? -1 : 1;
+  const length = Math.abs((min - max) / step) + 1;
+
+  for (let i = 0; i < length; i++) {
+    result.push(min + i * Math.abs(step) * direction);
+  }
+
+  return result;
 }
