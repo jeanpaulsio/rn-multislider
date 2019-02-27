@@ -1,9 +1,13 @@
-import { valueToPosition } from "../converters";
+import { valueToCoordinate } from "../converters";
 
 // index -> x
-describe("valueToPosition", () => {
+describe("valueToCoordinate", () => {
   it("works", () => {
-    const actual = valueToPosition(3, 200, [1, 2, 3, 4, 5]);
+    const actual = valueToCoordinate({
+      value: 3,
+      axisLength: 200,
+      values: [1, 2, 3, 4, 5]
+    });
     expect(actual).toEqual(100);
   });
 });

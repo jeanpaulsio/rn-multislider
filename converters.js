@@ -1,12 +1,7 @@
 /**
  * Calculates the x coordinate based on a given value
- *
- * @param {number} value
- * @param {number} axisLength
- * @param {array} values
- * @return {number}
  */
-export function valueToPosition(value, axisLength, values) {
+export function valueToCoordinate({ value, axisLength, values }) {
   const index = values.findIndex(i => i === value);
   const arrLength = values.length - 1;
   const validIndex = index === -1 ? arrLength : index;
@@ -17,13 +12,8 @@ export function valueToPosition(value, axisLength, values) {
 /**
  * Calculates the nearest value in the array based on a
  * given x coordinate
- *
- * @param {number} coordinate
- * @param {number} axisLength
- * @param {array} values
- * @return {number}
  */
-export function positionToValue(coordinate, axisLength, values) {
+export function coordinateToValue({ coordinate, axisLength, values }) {
   if (coordinate < 0 || axisLength < coordinate) {
     return null;
   }
@@ -35,12 +25,6 @@ export function positionToValue(coordinate, axisLength, values) {
 
 /**
  * Create an array based on min, max, and step values
- * For example, createArray(0, 3, 1) returns
- *    [0, 1, 2, 3]
- *
- * @param {number} min
- * @param {number} max
- * @return {array}
  */
 export function createArrayValues(min, max, step = 1) {
   const result = [];

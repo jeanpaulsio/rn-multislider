@@ -5,8 +5,8 @@ import { debounce } from "lodash";
 
 import {
   createArrayValues,
-  valueToPosition,
-  positionToValue
+  valueToCoordinate,
+  coordinateToValue
 } from "./converters";
 
 function DefaultMarker() {
@@ -66,7 +66,11 @@ export default class MultiSlider extends React.Component {
     this.stepLength = SLIDER_LENGTH / this.optionsArray.length;
 
     const [x1, x2] = this.props.values.map(value =>
-      valueToPosition(value, SLIDER_LENGTH, this.optionsArray)
+      valueToCoordinate({
+        value: value,
+        axisLength: SLIDER_LENGTH,
+        values: this.optionsArray
+      })
     );
 
     this.state = {
@@ -155,8 +159,20 @@ export default class MultiSlider extends React.Component {
             justifyContent: "space-between"
           }}
         >
-          <Text>{positionToValue(x1, SLIDER_LENGTH, this.optionsArray)}</Text>
-          <Text>{positionToValue(x2, SLIDER_LENGTH, this.optionsArray)}</Text>
+          <Text>
+            {coordinateToValue({
+              coordinate: x1,
+              axisLength: SLIDER_LENGTH,
+              values: this.optionsArray
+            })}
+          </Text>
+          <Text>
+            {coordinateToValue({
+              coordinate: x2,
+              axisLength: SLIDER_LENGTH,
+              values: this.optionsArray
+            })}
+          </Text>
         </View>
         <View style={styles.container}>
           <View style={[styles.fullTrack, { width: SLIDER_LENGTH }]}>
