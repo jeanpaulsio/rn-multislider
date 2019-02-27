@@ -1,12 +1,10 @@
 import React from "react";
 import { PanResponder, StyleSheet, Text, View } from "react-native";
 
-import { debounce } from "lodash";
-
 import {
+  coordinateToValue,
   createArrayValues,
-  valueToCoordinate,
-  coordinateToValue
+  valueToCoordinate
 } from "./converters";
 
 function DefaultMarker() {
@@ -46,9 +44,9 @@ function calculateNewXPosition(changeInX, minPossibleX, maxPossibleX) {
 }
 
 const SLIDER_LENGTH = 290;
-const MIN = 0;
-const MAX = 10;
-const STEP = 1;
+const MIN = 540;
+const MAX = 1200;
+const STEP = 30;
 const BOUNDARY = 20;
 
 // TODO need to be able to calculate BOUNDARY based on diameter of marker as well
@@ -62,14 +60,14 @@ export default class MultiSlider extends React.Component {
   constructor(props) {
     super(props);
 
-    this.optionsArray = createArrayValues(MIN, MAX, STEP);
-    this.stepLength = SLIDER_LENGTH / this.optionsArray.length;
+    this.arrayValues = createArrayValues(MIN, MAX, STEP);
+    this.stepLength = SLIDER_LENGTH / this.arrayValues.length;
 
     const [x1, x2] = this.props.values.map(value =>
       valueToCoordinate({
         value: value,
         axisLength: SLIDER_LENGTH,
-        values: this.optionsArray
+        values: this.arrayValues
       })
     );
 
@@ -80,8 +78,8 @@ export default class MultiSlider extends React.Component {
       prevX2: x2
     };
 
-    this._panResponderOne = customPanResponder(this.moveX1, this.endX1);
-    this._panResponderTwo = customPanResponder(this.moveX2, this.endX2);
+    this.panResponderX1 = customPanResponder(this.moveX1, this.endX1);
+    this.panResponderX2 = customPanResponder(this.moveX2, this.endX2);
   }
 
   moveX1 = gestureState => {
@@ -121,15 +119,11 @@ export default class MultiSlider extends React.Component {
   };
 
   endX1 = () => {
-    this.setState({ prevX1: this.state.x1 }, this.logstate);
+    this.setState({ prevX1: this.state.x1 });
   };
 
   endX2 = () => {
-    this.setState({ prevX2: this.state.x2 }, this.logstate);
-  };
-
-  logstate = () => {
-    // console.log(this.state);
+    this.setState({ prevX2: this.state.x2 });
   };
 
   render() {
@@ -163,14 +157,14 @@ export default class MultiSlider extends React.Component {
             {coordinateToValue({
               coordinate: x1,
               axisLength: SLIDER_LENGTH,
-              values: this.optionsArray
+              values: this.arrayValues
             })}
           </Text>
           <Text>
             {coordinateToValue({
               coordinate: x2,
               axisLength: SLIDER_LENGTH,
-              values: this.optionsArray
+              values: this.arrayValues
             })}
           </Text>
         </View>
@@ -191,12 +185,12 @@ export default class MultiSlider extends React.Component {
               ]}
             />
             <View style={[styles.markerContainer, markerContainerOne]}>
-              <View style={styles.touch} {...this._panResponderOne.panHandlers}>
+              <View style={styles.touch} {...this.panResponderX1.panHandlers}>
                 <DefaultMarker />
               </View>
             </View>
             <View style={[styles.markerContainer, markerContainerTwo]}>
-              <View style={styles.touch} {...this._panResponderTwo.panHandlers}>
+              <View style={styles.touch} {...this.panResponderX2.panHandlers}>
                 <DefaultMarker />
               </View>
             </View>

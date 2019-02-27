@@ -1,5 +1,5 @@
 /**
- * Calculates the x coordinate based on a given value
+ * Calculates the x-coordinate based on a given value.
  */
 export function valueToCoordinate({ value, axisLength, values }) {
   const index = values.findIndex(i => i === value);
@@ -10,8 +10,7 @@ export function valueToCoordinate({ value, axisLength, values }) {
 }
 
 /**
- * Calculates the nearest value in the array based on a
- * given x coordinate
+ * Calculates the nearest value in the array based on a given x coordinate.
  */
 export function coordinateToValue({ coordinate, axisLength, values }) {
   if (coordinate < 0 || axisLength < coordinate) {
@@ -24,7 +23,7 @@ export function coordinateToValue({ coordinate, axisLength, values }) {
 }
 
 /**
- * Create an array based on min, max, and step values
+ * Create an array of values based on min, max, and step
  */
 export function createArrayValues(min, max, step = 1) {
   const result = [];
