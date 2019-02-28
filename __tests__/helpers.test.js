@@ -3,7 +3,7 @@ import {
   coordinateToValue,
   createArrayValues,
   valueToCoordinate
-} from "../converters";
+} from "../helpers";
 
 describe("valueToCoordinate", () => {
   const axisLength = 200;
