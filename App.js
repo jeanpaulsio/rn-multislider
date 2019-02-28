@@ -28,8 +28,8 @@ export default class App extends React.PureComponent {
           min={540}
           minStepRange={2}
           onValuesChange={this.onValuesChange}
-          step={30}
           sliderLength={270}
+          step={30}
           values={[this.state.x1, this.state.x2]}
         />
       </View>
