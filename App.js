@@ -7,13 +7,9 @@ import {
   valueToCoordinate
 } from "./converters";
 
-function formatTimeFromMinutes(minutes) {
-  const hours = Math.floor(minutes / 60);
-  const mins = `0${minutes % 60}`.slice(-2);
-  const suffix = hours < 12 ? " am" : " pm";
-  return `${((hours + 11) % 12) + 1}:${mins}${suffix}`;
-}
-
+/**
+ * Default marker
+ */
 function DefaultMarker() {
   return (
     <View
@@ -29,6 +25,12 @@ function DefaultMarker() {
   );
 }
 
+/**
+ * Create a panResponder that customizes:
+ * onPanResponderMove
+ * onPanResponderRelease
+ * onPanResponderTerminate
+ */
 function createPanResponder(move, end) {
   return PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -58,7 +60,6 @@ function calculateNewXPosition(newX, minPossibleX, maxPossibleX) {
 
 // TODO: need to make SLIDER_LENGTH not a fixed width
 const SLIDER_LENGTH = 270;
-
 const MIN = 540;
 const MAX = 1200;
 const STEP = 30;
@@ -157,22 +158,18 @@ export default class MultiSlider extends React.Component {
           }}
         >
           <Text>
-            {formatTimeFromMinutes(
-              coordinateToValue({
-                coordinate: x1,
-                axisLength: SLIDER_LENGTH,
-                values: this.arrayValues
-              })
-            )}
+            {coordinateToValue({
+              coordinate: x1,
+              axisLength: SLIDER_LENGTH,
+              values: this.arrayValues
+            })}
           </Text>
           <Text>
-            {formatTimeFromMinutes(
-              coordinateToValue({
-                coordinate: x2,
-                axisLength: SLIDER_LENGTH,
-                values: this.arrayValues
-              })
-            )}
+            {coordinateToValue({
+              coordinate: x2,
+              axisLength: SLIDER_LENGTH,
+              values: this.arrayValues
+            })}
           </Text>
         </View>
         <View style={styles.container}>
