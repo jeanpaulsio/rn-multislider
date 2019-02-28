@@ -1,5 +1,5 @@
 import React from "react";
-import { Animated, PanResponder, StyleSheet, Text, View } from "react-native";
+import { PanResponder, StyleSheet, Text, View } from "react-native";
 
 import {
   coordinateToValue,
@@ -44,13 +44,12 @@ function calculateNewXPosition(changeInX, minPossibleX, maxPossibleX) {
     : changeInX;
 }
 
-const SLIDER_LENGTH = 270;
+const SLIDER_LENGTH = 375;
 
 const MIN = 1;
 const MAX = 10;
 const STEP = 1;
 // TODO: need to make SLIDER_LENGTH not a fixed width
-// TODO: prevent x1 and x2 from being the same values
 
 export default class MultiSlider extends React.Component {
   static defaultProps = {
@@ -71,9 +70,6 @@ export default class MultiSlider extends React.Component {
         values: this.arrayValues
       })
     );
-
-    this.animatedX1 = new Animated.Value(x1);
-    this.animatedX2 = new Animated.Value(x2);
 
     this.state = {
       x1,
