@@ -7,6 +7,13 @@ import {
   valueToCoordinate
 } from "./converters";
 
+function formatTimeFromMinutes(minutes) {
+  const hours = Math.floor(minutes / 60);
+  const mins = `0${minutes % 60}`.slice(-2);
+  const suffix = hours < 12 ? " am" : " pm";
+  return `${((hours + 11) % 12) + 1}:${mins}${suffix}`;
+}
+
 function DefaultMarker() {
   return (
     <View
@@ -14,7 +21,9 @@ function DefaultMarker() {
         width: MARKER_SIZE,
         height: MARKER_SIZE,
         borderRadius: MARKER_SIZE / 2,
-        backgroundColor: "grey"
+        backgroundColor: "white",
+        borderWidth: 1,
+        borderColor: "#D8E3E7"
       }}
     />
   );
@@ -35,21 +44,25 @@ function createPanResponder(move, end) {
   });
 }
 
-// TODO: write test for this
-function calculateNewXPosition(changeInX, minPossibleX, maxPossibleX) {
-  return changeInX < minPossibleX
+/**
+ * Make sure that x1 doesn't overshoot x2 and
+ * make sure that x2 doesn't overshoot x1
+ */
+function calculateNewXPosition(newX, minPossibleX, maxPossibleX) {
+  return newX < minPossibleX
     ? minPossibleX
-    : changeInX > maxPossibleX
+    : newX > maxPossibleX
     ? maxPossibleX
-    : changeInX;
+    : newX;
 }
 
-const SLIDER_LENGTH = 375;
-
-const MIN = 1;
-const MAX = 10;
-const STEP = 1;
 // TODO: need to make SLIDER_LENGTH not a fixed width
+const SLIDER_LENGTH = 270;
+
+const MIN = 540;
+const MAX = 1200;
+const STEP = 30;
+const MIN_STEP_RANGE = 2;
 
 export default class MultiSlider extends React.Component {
   static defaultProps = {
@@ -60,8 +73,9 @@ export default class MultiSlider extends React.Component {
     super(props);
 
     this.arrayValues = createArrayValues(MIN, MAX, STEP);
-
     this.stepLength = SLIDER_LENGTH / (this.arrayValues.length - 1);
+    this.panResponderX1 = createPanResponder(this.moveX1, this.endX1);
+    this.panResponderX2 = createPanResponder(this.moveX2, this.endX2);
 
     const [x1, x2] = this.props.values.map(value =>
       valueToCoordinate({
@@ -77,25 +91,16 @@ export default class MultiSlider extends React.Component {
       prevX1: x1,
       prevX2: x2
     };
-
-    this.panResponderX1 = createPanResponder(this.moveX1, this.endX1);
-    this.panResponderX2 = createPanResponder(this.moveX2, this.endX2);
   }
 
   moveX1 = gestureState => {
     const dx = gestureState.dx;
-    // TODO rename changeInX
-    const changeInX = dx + this.state.prevX1;
+    const newX = dx + this.state.prevX1;
 
     const minPossibleX = 0;
-    const maxPossibleX = this.state.x2 - this.stepLength;
+    const maxPossibleX = this.state.x2 - this.stepLength * MIN_STEP_RANGE;
 
-    let x1 = calculateNewXPosition(changeInX, minPossibleX, maxPossibleX);
-    console.log("move x1:", x1, this.state.x2, this.stepLength);
-
-    // if (maxPossibleX - x1 <= BOUNDARY) {
-    //   x1 = maxPossibleX - BOUNDARY;
-    // }
+    const x1 = calculateNewXPosition(newX, minPossibleX, maxPossibleX);
 
     if (this.state.prevX1 !== x1) {
       this.setState({ x1 });
@@ -104,16 +109,12 @@ export default class MultiSlider extends React.Component {
 
   moveX2 = gestureState => {
     const dx = gestureState.dx;
-    const changeInX = dx + this.state.prevX2;
+    const newX = dx + this.state.prevX2;
 
-    const minPossibleX = this.state.x1 + this.stepLength;
+    const minPossibleX = this.state.x1 + this.stepLength * MIN_STEP_RANGE;
     const maxPossibleX = SLIDER_LENGTH;
 
-    let x2 = calculateNewXPosition(changeInX, minPossibleX, maxPossibleX);
-
-    // if (minPossibleX + BOUNDARY >= x2) {
-    //   x2 = minPossibleX + BOUNDARY;
-    // }
+    const x2 = calculateNewXPosition(newX, minPossibleX, maxPossibleX);
 
     if (this.state.prevX2 !== x2) {
       this.setState({ x2 });
@@ -131,18 +132,18 @@ export default class MultiSlider extends React.Component {
   render() {
     const { x1, x2 } = this.state;
 
-    const trackOneLength = x1;
-    const trackThreeLength = SLIDER_LENGTH - x2;
-    const trackTwoLength = SLIDER_LENGTH - trackOneLength - trackThreeLength;
+    const trackLeftWidth = x1;
+    const trackRightWidth = SLIDER_LENGTH - x2;
+    const trackSelectedWidth = SLIDER_LENGTH - trackLeftWidth - trackRightWidth;
 
     const markerContainerOne = {
-      top: -MARKER_CONTAINER_SIZE / 2,
-      left: trackOneLength - MARKER_CONTAINER_SIZE / 2
+      top: -MARKER_CONTAINER_SIZE / 2 + TRACK_HEIGHT / 2,
+      left: trackLeftWidth - MARKER_CONTAINER_SIZE / 2
     };
 
     const markerContainerTwo = {
-      top: -MARKER_CONTAINER_SIZE / 2,
-      right: trackThreeLength - MARKER_CONTAINER_SIZE / 2
+      top: -MARKER_CONTAINER_SIZE / 2 + TRACK_HEIGHT / 2,
+      right: trackRightWidth - MARKER_CONTAINER_SIZE / 2
     };
 
     return (
@@ -156,33 +157,35 @@ export default class MultiSlider extends React.Component {
           }}
         >
           <Text>
-            {coordinateToValue({
-              coordinate: x1,
-              axisLength: SLIDER_LENGTH,
-              values: this.arrayValues
-            })}{" "}
-            {this.state.x1.toFixed(3)}
+            {formatTimeFromMinutes(
+              coordinateToValue({
+                coordinate: x1,
+                axisLength: SLIDER_LENGTH,
+                values: this.arrayValues
+              })
+            )}
           </Text>
           <Text>
-            {coordinateToValue({
-              coordinate: x2,
-              axisLength: SLIDER_LENGTH,
-              values: this.arrayValues
-            })}{" "}
-            {this.state.x2.toFixed(3)}
+            {formatTimeFromMinutes(
+              coordinateToValue({
+                coordinate: x2,
+                axisLength: SLIDER_LENGTH,
+                values: this.arrayValues
+              })
+            )}
           </Text>
         </View>
         <View style={styles.container}>
           <View style={[styles.fullTrack, { width: SLIDER_LENGTH }]}>
-            <View style={[styles.track, { width: trackOneLength }]} />
+            <View style={[styles.track, { width: trackLeftWidth }]} />
             <View
               style={[
                 styles.track,
                 styles.selectedTrack,
-                { width: trackTwoLength }
+                { width: trackSelectedWidth }
               ]}
             />
-            <View style={[styles.track, { width: trackThreeLength }]} />
+            <View style={[styles.track, { width: trackRightWidth }]} />
             <View
               style={[styles.markerContainer, markerContainerOne]}
               {...this.panResponderX1.panHandlers}
@@ -202,9 +205,9 @@ export default class MultiSlider extends React.Component {
   }
 }
 
-const MARKER_CONTAINER_SIZE = 48;
-const MARKER_SIZE = MARKER_CONTAINER_SIZE / 3;
-const BOUNDARY = 30;
+const MARKER_SIZE = 24;
+const MARKER_CONTAINER_SIZE = MARKER_SIZE * 2;
+const TRACK_HEIGHT = 6;
 
 const styles = StyleSheet.create({
   Root: {
@@ -215,19 +218,18 @@ const styles = StyleSheet.create({
   container: {
     position: "relative",
     height: MARKER_CONTAINER_SIZE,
-    justifyContent: "center",
-    borderWidth: 1
+    justifyContent: "center"
   },
   fullTrack: {
     flexDirection: "row"
   },
   track: {
-    height: 2,
-    borderRadius: 2,
-    backgroundColor: "#A7A7A7"
+    height: TRACK_HEIGHT,
+    borderRadius: TRACK_HEIGHT,
+    backgroundColor: "#D8E3E7"
   },
   selectedTrack: {
-    backgroundColor: "red"
+    backgroundColor: "#FFA5A7"
   },
   markerContainer: {
     position: "absolute",
@@ -235,7 +237,6 @@ const styles = StyleSheet.create({
     height: MARKER_CONTAINER_SIZE,
     backgroundColor: "transparent",
     justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1
+    alignItems: "center"
   }
 });
