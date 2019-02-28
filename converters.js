@@ -1,53 +1,53 @@
 /**
- * Given a MIN of _1_ and a MAX of _10_ with a STEP of _1_,
- * data is represented like this:
+ *   Given a MIN of _1_ and a MAX of _10_ with a STEP of _1_,
+ *   data is represented like this:
  *
  *
- * Data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+ *   Data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
  *
  *
- * The multislider UI under the hood is represented like this:
+ *   The multislider UI under the hood is represented like this:
  *
  *
- * │----│----│----│----│----│----│----│----│----│
- * 1    2    3    4    5    6    7    8    9    10
+ *   │----│----│----│----│----│----│----│----│----│
+ *   1    2    3    4    5    6    7    8    9    10
  *
  *
- * Assume the length of the axis is _270_ units.
- * This means that each section is exactly _30_ units since
- *  270 / 9 = 30
+ *   Assume the length of the axis is _270_ units.
+ *   This means that each section is exactly _30_ units since
+ *   270 / 9 = 30
  *
  *
- *   30   30   etc
- * │----│----│----│----│----│----│----│----│----│
- * 1    2    3    4    5    6    7    8    9    10
+ *     30   30   etc
+ *   │----│----│----│----│----│----│----│----│----│
+ *   1    2    3    4    5    6    7    8    9    10
  *
  *
- * A multislider will have 2 markers on it at any
- * given time. They are displayed as points on a line.
- * If our line is _270_ units wide and we want our values
- * to land exactly where _3_ and _7_ are, our x-coordinates would
- * be _60_ and _180_
+ *   A multislider will have 2 markers on it at any
+ *   given time. They are displayed as points on a line.
+ *   If our line is _270_ units wide and we want our values
+ *   to land exactly where _3_ and _7_ are, our x-coordinates would
+ *   be _60_ and _180_
  *
- * x1 = 60
- * x2 = 180
+ *   x1 = 60
+ *   x2 = 180
  *
- * These x-coordinates are calculated:
- *    index in array * step length
+ *   These x-coordinates are calculated:
+ *      index in array * step length
  *
- *          _x1_                 _x2_
- * 0    30   60   90   120  150  180   etc
- * │----│----■----│----│----│----■----│----│----│
- * 1    2    3    4    5    6    7    8    9    10
+ *            _x1_                 _x2_
+ *   0    30   60   90   120  150  180   etc
+ *   │----│----■----│----│----│----■----│----│----│
+ *   1    2    3    4    5    6    7    8    9    10
  *
  *
- * For values to be calculated as 3 and 7, our x-coordinates do
- * not always have to divide evenly by the step length. This is
- * represented below:
+ *   For values to be calculated as 3 and 7, our x-coordinates do
+ *   not always have to divide evenly by the step length. This is
+ *   represented below:
  *
- *          ~61                 ~179
- * │----│----│■---│----│----│---■│----│----│----│
- * 1    2    3    4    5    6    7    8    9    10
+ *            ~61                 ~179
+ *   │----│----│■---│----│----│---■│----│----│----│
+ *   1    2    3    4    5    6    7    8    9    10
  *
  *
  */
