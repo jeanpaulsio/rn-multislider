@@ -1,7 +1,8 @@
 import {
-  valueToCoordinate,
+  calculateNewXPosition,
   coordinateToValue,
-  createArrayValues
+  createArrayValues,
+  valueToCoordinate
 } from "../converters";
 
 describe("valueToCoordinate", () => {
@@ -202,5 +203,22 @@ describe("createArrayValues", () => {
   it("works with a negative step", () => {
     const actual = createArrayValues(20, 10, -5);
     expect(actual).toEqual([20, 15, 10]);
+  });
+});
+
+describe("calculateNewXPosition", () => {
+  it("returns x if it is within boundaries", () => {
+    const actual = calculateNewXPosition(100, 0, 200);
+    expect(actual).toEqual(100);
+  });
+
+  it("returns max possible x if newX overshoots", () => {
+    const actual = calculateNewXPosition(201, 0, 200);
+    expect(actual).toEqual(200);
+  });
+
+  it("returns min possible x if newX undershoots", () => {
+    const actual = calculateNewXPosition(-1, 0, 200);
+    expect(actual).toEqual(0);
   });
 });

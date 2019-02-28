@@ -110,3 +110,21 @@ export function createArrayValues(min, max, step = 1) {
 
   return result;
 }
+
+/**
+ * Make sure that x1 doesn't overshoot x2 and
+ * make sure that x2 doesn't overshoot x1
+ *
+ * @param {number} newX - calculated x value
+ * @param {number} maxPossibleX
+ * @param {number} minPossibleX
+ *
+ * @return {number}
+ */
+export function calculateNewXPosition(newX, minPossibleX, maxPossibleX) {
+  return newX < minPossibleX
+    ? minPossibleX
+    : newX > maxPossibleX
+    ? maxPossibleX
+    : newX;
+}

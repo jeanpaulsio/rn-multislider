@@ -2,6 +2,7 @@ import React from "react";
 import { PanResponder, StyleSheet, Text, View } from "react-native";
 
 import {
+  calculateNewXPosition,
   coordinateToValue,
   createArrayValues,
   valueToCoordinate
@@ -44,18 +45,6 @@ function createPanResponder(move, end) {
     onPanResponderTerminate: (_, gs) => end(gs),
     onShouldBlockNativeResponder: () => true
   });
-}
-
-/**
- * Make sure that x1 doesn't overshoot x2 and
- * make sure that x2 doesn't overshoot x1
- */
-function calculateNewXPosition(newX, minPossibleX, maxPossibleX) {
-  return newX < minPossibleX
-    ? minPossibleX
-    : newX > maxPossibleX
-    ? maxPossibleX
-    : newX;
 }
 
 // TODO: need to make SLIDER_LENGTH not a fixed width
