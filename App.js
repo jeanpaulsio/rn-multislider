@@ -1,5 +1,5 @@
 import React from "react";
-import { PanResponder, StyleSheet, Text, View } from "react-native";
+import { Animated, PanResponder, StyleSheet, Text, View } from "react-native";
 
 import {
   coordinateToValue,
@@ -44,26 +44,25 @@ function calculateNewXPosition(changeInX, minPossibleX, maxPossibleX) {
     : changeInX;
 }
 
-const SLIDER_LENGTH = 290;
-// const MIN = 540;
-// const MAX = 1200;
-// const STEP = 30;
+const SLIDER_LENGTH = 270;
 
 const MIN = 1;
 const MAX = 10;
 const STEP = 1;
 // TODO: need to make SLIDER_LENGTH not a fixed width
+// TODO: prevent x1 and x2 from being the same values
 
 export default class MultiSlider extends React.Component {
   static defaultProps = {
-    values: [MIN, MAX - 2]
+    values: [MIN, MAX]
   };
 
   constructor(props) {
     super(props);
 
     this.arrayValues = createArrayValues(MIN, MAX, STEP);
-    this.stepLength = SLIDER_LENGTH / this.arrayValues.length;
+
+    this.stepLength = SLIDER_LENGTH / (this.arrayValues.length - 1);
 
     const [x1, x2] = this.props.values.map(value =>
       valueToCoordinate({
@@ -72,6 +71,9 @@ export default class MultiSlider extends React.Component {
         values: this.arrayValues
       })
     );
+
+    this.animatedX1 = new Animated.Value(x1);
+    this.animatedX2 = new Animated.Value(x2);
 
     this.state = {
       x1,
@@ -86,18 +88,18 @@ export default class MultiSlider extends React.Component {
 
   moveX1 = gestureState => {
     const dx = gestureState.dx;
+    // TODO rename changeInX
     const changeInX = dx + this.state.prevX1;
 
     const minPossibleX = 0;
     const maxPossibleX = this.state.x2 - this.stepLength;
 
     let x1 = calculateNewXPosition(changeInX, minPossibleX, maxPossibleX);
+    console.log("move x1:", x1, this.state.x2, this.stepLength);
 
-    const boundary = 0;
-
-    if (maxPossibleX - x1 <= boundary) {
-      x1 = maxPossibleX - boundary;
-    }
+    // if (maxPossibleX - x1 <= BOUNDARY) {
+    //   x1 = maxPossibleX - BOUNDARY;
+    // }
 
     if (this.state.prevX1 !== x1) {
       this.setState({ x1 });
@@ -113,11 +115,9 @@ export default class MultiSlider extends React.Component {
 
     let x2 = calculateNewXPosition(changeInX, minPossibleX, maxPossibleX);
 
-    const boundary = 0;
-
-    if (minPossibleX + boundary >= x2) {
-      x2 = minPossibleX + boundary;
-    }
+    // if (minPossibleX + BOUNDARY >= x2) {
+    //   x2 = minPossibleX + BOUNDARY;
+    // }
 
     if (this.state.prevX2 !== x2) {
       this.setState({ x2 });
@@ -164,14 +164,16 @@ export default class MultiSlider extends React.Component {
               coordinate: x1,
               axisLength: SLIDER_LENGTH,
               values: this.arrayValues
-            })}
+            })}{" "}
+            {this.state.x1.toFixed(3)}
           </Text>
           <Text>
             {coordinateToValue({
               coordinate: x2,
               axisLength: SLIDER_LENGTH,
               values: this.arrayValues
-            })}
+            })}{" "}
+            {this.state.x2.toFixed(3)}
           </Text>
         </View>
         <View style={styles.container}>
@@ -206,7 +208,7 @@ export default class MultiSlider extends React.Component {
 
 const MARKER_CONTAINER_SIZE = 48;
 const MARKER_SIZE = MARKER_CONTAINER_SIZE / 3;
-const BOUNDARY = MARKER_SIZE;
+const BOUNDARY = 30;
 
 const styles = StyleSheet.create({
   Root: {
