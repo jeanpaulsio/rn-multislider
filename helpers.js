@@ -52,6 +52,8 @@
  *
  */
 
+import { PanResponder } from "react-native";
+
 /**
  * Calculates the x-coordinate based on a given value.
  *
@@ -127,4 +129,25 @@ export function calculateNewXPosition(newX, minPossibleX, maxPossibleX) {
     : newX > maxPossibleX
     ? maxPossibleX
     : newX;
+}
+
+/**
+ * Create a panResponder that customizes:
+ * onPanResponderMove
+ * onPanResponderRelease
+ * onPanResponderTerminate
+ */
+export function createPanResponder(move, end) {
+  return PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onStartShouldSetPanResponderCapture: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponderCapture: () => true,
+    onPanResponderGrant: () => true,
+    onPanResponderMove: (_, gs) => move(gs),
+    onPanResponderTerminationRequest: () => false,
+    onPanResponderRelease: (_, gs) => end(gs),
+    onPanResponderTerminate: (_, gs) => end(gs),
+    onShouldBlockNativeResponder: () => true
+  });
 }
