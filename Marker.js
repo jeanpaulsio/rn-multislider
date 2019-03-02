@@ -1,19 +1,27 @@
 import React from "react";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 function Marker(props) {
   return (
     <View
-      style={{
-        width: props.size,
-        height: props.size,
-        borderRadius: props.size / 2,
-        backgroundColor: "white",
-        borderWidth: 1,
-        borderColor: "#D8E3E7"
-      }}
+      style={[
+        STYLES.Root,
+        {
+          width: props.size,
+          height: props.size,
+          borderRadius: props.size / 2
+        }
+      ]}
     />
   );
 }
 
 export default Marker;
+
+const STYLES = StyleSheet.create({
+  Root: {
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#D8E3E7"
+  }
+});
