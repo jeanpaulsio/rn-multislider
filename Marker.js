@@ -1,5 +1,10 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
+import PropTypes from "prop-types";
+
+Marker.propTypes = {
+  size: PropTypes.number.isRequired
+};
 
 function Marker(props) {
   return (

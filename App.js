@@ -6,7 +6,7 @@ import Multislider from "./Multislider";
 export default class App extends React.PureComponent {
   state = { x1: 540, x2: 1200 };
 
-  onValuesChange = ({ x1, x2 }) => {
+  onValuesChange = ([x1, x2]) => {
     this.setState({ x1, x2 });
   };
 
@@ -26,7 +26,7 @@ export default class App extends React.PureComponent {
         <Multislider
           max={1200}
           min={540}
-          minStepRange={2}
+          minStepSeparation={2}
           onValuesChange={this.onValuesChange}
           sliderLength={270}
           step={30}

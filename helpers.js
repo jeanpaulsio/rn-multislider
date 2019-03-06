@@ -53,6 +53,7 @@
  */
 
 import { PanResponder } from "react-native";
+import { last } from "lodash";
 
 /**
  * Calculates the x-coordinate based on a given value.
@@ -65,11 +66,18 @@ import { PanResponder } from "react-native";
  * @return {number} - translation of the value to a coordinate within the axisLength
  */
 export function valueToCoordinate({ value, axisLength, values }) {
-  const index = values.findIndex(i => i === value);
-  const arrLength = values.length - 1;
-  const validIndex = index === -1 ? arrLength : index;
+  let index;
+  const lastIndex = values.length - 1;
 
-  return (axisLength * validIndex) / arrLength;
+  if (value > last(values)) {
+    index = lastIndex;
+  } else if (value < 0) {
+    index = 0;
+  } else {
+    index = values.findIndex(i => i >= value);
+  }
+
+  return (axisLength * index) / lastIndex;
 }
 
 /**
@@ -101,13 +109,24 @@ export function coordinateToValue({ coordinate, axisLength, values }) {
  *
  * @return {array}
  */
-export function createArrayValues(min, max, step = 1) {
+export function createArrayValues(coord1, coord2, step = 1) {
   const result = [];
-  const direction = min - max > 0 ? -1 : 1;
-  const length = Math.abs((min - max) / step) + 1;
+  const direction = coord1 - coord2 > 0 ? -1 : 1;
+  const length = Math.abs((coord1 - coord2) / step) + 1;
 
   for (let i = 0; i < length; i++) {
-    result.push(min + i * Math.abs(step) * direction);
+    const value = coord1 + i * Math.abs(step) * direction;
+
+    // handle overflow
+    if (
+      (direction > 0 && value > coord2) ||
+      (direction < 0 && value < coord2)
+    ) {
+      result.push(coord2);
+      break;
+    }
+
+    result.push(value);
   }
 
   return result;
@@ -124,30 +143,77 @@ export function createArrayValues(min, max, step = 1) {
  * @return {number}
  */
 export function calculateNewXPosition(newX, minPossibleX, maxPossibleX) {
-  return newX < minPossibleX
-    ? minPossibleX
-    : newX > maxPossibleX
-    ? maxPossibleX
-    : newX;
+  if (newX < minPossibleX) {
+    return minPossibleX;
+  }
+
+  if (newX > maxPossibleX) {
+    return maxPossibleX;
+  }
+
+  return newX;
 }
 
 /**
- * Create a panResponder that customizes:
- * onPanResponderMove
- * onPanResponderRelease
- * onPanResponderTerminate
+ *   Four tracks make up the UI for the multislider:
+ *    - trackBase(tB)
+ *    - trackLeft(tL)
+ *    - trackSelected(tS)
+ *    - trackRight(tR)
+ *
+ *   tL, tS, and tR are exactly what you'd think they are:
+ *
+ *             x1                  x2
+ *   │----│----■====│====│====│====■----│----│----│
+ *   1    2    3    4    5    6    7    8    9    10
+ *        tL    │        tS         │      tR
+ *
+ *   trackBase(tB) is beneath the entire track. The reason we do this is so that
+ *   the edges of the track _will match the edges of the left-most and right-most edge
+ *   of the markers_.
+ *
+ *   Without trackBase, the center of the markers is where the axis ends.
+ *   As a result, half of each marker hangs over the edge.
+ *
  */
-export function createPanResponder(move, end) {
-  return PanResponder.create({
-    onStartShouldSetPanResponder: () => true,
-    onStartShouldSetPanResponderCapture: () => true,
-    onMoveShouldSetPanResponder: () => true,
-    onMoveShouldSetPanResponderCapture: () => true,
-    onPanResponderGrant: () => true,
-    onPanResponderMove: (_, gs) => move(gs),
-    onPanResponderTerminationRequest: () => false,
-    onPanResponderRelease: (_, gs) => end(gs),
-    onPanResponderTerminate: (_, gs) => end(gs),
-    onShouldBlockNativeResponder: () => true
-  });
+export function calculateMultiSliderTrackLengths({
+  x1,
+  x2,
+  axisLength,
+  markerSize
+}) {
+  const trackBaseWidth = axisLength + markerSize;
+  const trackLeftWidth = x1;
+  const trackRightWidth = axisLength - x2;
+  const trackSelectedWidth = axisLength - trackLeftWidth - trackRightWidth;
+
+  return {
+    trackBaseWidth,
+    trackLeftWidth,
+    trackRightWidth,
+    trackSelectedWidth
+  };
+}
+
+/**
+ * Track lengths for the single slider are much simpler.
+ * You only need the base track and the selected track.
+ *
+ *                                 x1
+ *   │====│====│====│====│====│====■----│----│----│
+ *   1    2    3    4    5    6    7    8    9    10
+ *
+ */
+export function calculateSingleSliderTrackLengths({
+  x1,
+  axisLength,
+  markerSize
+}) {
+  const trackBaseWidth = axisLength + markerSize;
+  const trackSelectedWidth = x1;
+
+  return {
+    trackBaseWidth,
+    trackSelectedWidth
+  };
 }
